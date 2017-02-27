@@ -11,8 +11,6 @@
                                commons-io
                                org.apache.commons/commons-compress]]
                  [org.datavec/datavec-api "0.7.2"]
-                 [org.nd4j/nd4j-native-platform "0.7.2"]
-                 ]
-  :main ^:skip-aot clj-dl4-examples.core
+                 [org.nd4j/nd4j-native-platform "0.7.2"]]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

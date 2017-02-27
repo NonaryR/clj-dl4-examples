@@ -1,8 +1,9 @@
 (ns clj-dl4-examples.mnist-single-layer
+  (:require [clj-dl4-examples.model-utils :as model-utils])
   (:import [org.nd4j.linalg.activations Activation]
+           [org.deeplearning4j.nn.multilayer MultiLayerNetwork]
            [org.nd4j.linalg.dataset.api.iterator DataSetIterator]
            [org.deeplearning4j.datasets.iterator.impl MnistDataSetIterator]
-           [org.deeplearning4j.eval Evaluation]
            [org.deeplearning4j.nn.api OptimizationAlgorithm]
            [org.deeplearning4j.nn.conf MultiLayerConfiguration
             Updater
@@ -14,20 +15,12 @@
             DenseLayer$Builder
             DenseLayer
             ]
-           [org.deeplearning4j.nn.multilayer MultiLayerNetwork]
            [org.deeplearning4j.nn.weights WeightInit]
            [org.deeplearning4j.optimize.api IterationListener]
-           [org.deeplearning4j.optimize.listeners ScoreIterationListener]
            [org.nd4j.linalg.api.ndarray INDArray]
            [org.nd4j.linalg.dataset DataSet]
            [org.nd4j.linalg.dataset.api.iterator.DataSetIterator]
-           [org.nd4j.linalg.lossfunctions LossFunctions LossFunctions$LossFunction]
-           [java.io]
-           [java.nio.file Files]
-           [java.nio.file Paths]
-           [java.util Arrays]
-           [java.util Random]
-           [org.apache.commons.io FileUtils]))
+           [org.nd4j.linalg.lossfunctions LossFunctions LossFunctions$LossFunction]))
 
 (def num-rows 28)
 (def num-columns 28)
@@ -36,14 +29,15 @@
 (def seed 123)
 (def num-epochs 3)
 (def listener-freq 1)
+;; (def num-examples 50000)
 
 (def ^DataSetIterator iter-train (MnistDataSetIterator. batch-size true seed))
 (def ^DataSetIterator iter-test (MnistDataSetIterator. batch-size false seed))
 
-;;(def split-train-num (int (* batch-size 0.8)))
-;; (def iter (MnistDataSetIterator. batch-size ???))
+;; (def iter (MnistDataSetIterator. batch-size num-examples false))
+;; (def split-train-num (int (* batch-size 0.8)))
 ;; (def nxt (.next iter))
-;; (def test-and-train (.splitTestAndTrain nxt split-train-num (Random. (int seed))))
+;; (def test-and-train (.splitTestAndTrain nxt split-train-num (java.util.Random. (int seed))))
 ;; (def train (.getTrain test-and-train))
 ;; (def tst (.getTest test-and-train))
 
@@ -79,21 +73,10 @@
       (.build)))
 
 (def model (MultiLayerNetwork. conf))
-(.init model)
 
-(.setListeners model (list (ScoreIterationListener. listener-freq)))
-
-(defn train
-  []
-  (doseq [_ (range num-epochs)]
-    (.fit model iter-train)))
-
-(defn evaluate
-  []
-  (let [evaluation (Evaluation. output-num)]
-    (while (.hasNext iter-test)
-      (let [n (.next iter-test)]
-        (->> (.getFeatureMatrix n)
-             (.output model)
-             (.eval evaluation (.getLabels n)))))
-    (println (.stats evaluation))))
+(model-utils/small-pipe model
+                        iter-train
+                        iter-test
+                        num-epochs
+                        output-num
+                        listener-freq)
