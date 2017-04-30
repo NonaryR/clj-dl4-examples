@@ -27,7 +27,8 @@
            [java.nio.file Paths]
            [java.util Arrays]
            [java.util Random]
-           [org.apache.commons.io FileUtils]))
+           [org.apache.commons.io FileUtils])
+  (:require [clj-dl4-examples.model-utils :as model-utils]))
 
 (def ^Integer num-rows 28)
 (def ^Integer num-columns 28)
@@ -85,21 +86,11 @@
       (.build)))
 
 (def model (MultiLayerNetwork. conf))
-(.init model)
 
-(.setListeners model (list (ScoreIterationListener. listener-freq)))
-
-(defn train
-  []
-  (doseq [_ (range num-epochs)]
-    (.fit model iter-train)))
-
-(defn evaluate
-  []
-  (let [evaluation (Evaluation. output-num)]
-    (while (.hasNext iter-test)
-      (let [n (.next iter-test)]
-        (->> (.getFeatureMatrix n)
-             (.output model)
-             (.eval evaluation (.getLabels n)))))
-    (println (.stats evaluation))))
+(defn all-cycle []
+  (model-utils/pipe-visualization  model
+                                   iter-train
+                                   iter-test
+                                   num-epochs
+                                   output-num
+                                   listener-freq))

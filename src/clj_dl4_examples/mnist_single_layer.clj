@@ -8,13 +8,13 @@
            [org.deeplearning4j.nn.conf MultiLayerConfiguration
             Updater
             NeuralNetConfiguration
-            NeuralNetConfiguration$Builder
-            ]
+            NeuralNetConfiguration$Builder]
+
            [org.deeplearning4j.nn.conf.layers OutputLayer
             OutputLayer$Builder
             DenseLayer$Builder
-            DenseLayer
-            ]
+            DenseLayer]
+
            [org.deeplearning4j.nn.weights WeightInit]
            [org.deeplearning4j.optimize.api IterationListener]
            [org.nd4j.linalg.api.ndarray INDArray]
@@ -74,9 +74,10 @@
 
 (def model (MultiLayerNetwork. conf))
 
-(model-utils/small-pipe model
-                        iter-train
-                        iter-test
-                        num-epochs
-                        output-num
-                        listener-freq)
+(defn all-cycle []
+  (model-utils/pipe-visualization model
+                                  iter-train
+                                  iter-test
+                                  num-epochs
+                                  output-num
+                                  listener-freq))
